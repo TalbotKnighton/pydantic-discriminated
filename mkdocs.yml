@@ -1,1 +1,49 @@
-site_name: My Docs
+site_name: pydantic-discriminated
+site_description: Type-safe discriminated unions for Pydantic models
+site_url: https://talbotknighton.github.io/pydantic-discriminated/
+repo_url: https://github.com/TalbotKnighton/pydantic-discriminated
+repo_name: TalbotKnighton/pydantic-discriminated
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+plugins:
+  - search
+  - mike:  # for versioned docs
+      version_selector: true
+      canonical_version: latest
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed
+  - pymdownx.critic
+  - admonition
+  - footnotes
+  - attr_list
+  - md_in_html
+  - tables
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api-reference.md
+  - Examples:
+    - Basic Usage: examples/basic-usage.md
+    - Advanced: examples/advanced.md
+    - FastAPI Integration: examples/fastapi.md
+  - Configuration: configuration.md
+  - Changelog: changelog.md
