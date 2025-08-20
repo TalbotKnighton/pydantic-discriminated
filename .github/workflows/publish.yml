@@ -3,13 +3,18 @@ name: Publish Package
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'  # Trigger on version tags (v0.1.0, v1.0.0, etc.)
+
+# Add this permissions block
+permissions:
+  contents: read
+  id-token: write  # This is needed for PyPI's trusted publishing
 
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    environment: pypi  # Specify the environment name here
-    
+    environment: pypi
+
     steps:
       - uses: actions/checkout@v3
       
@@ -21,12 +26,11 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build twine
+          pip install build
           
       - name: Build package
         run: python -m build
         
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+        # No need to specify token when using trusted publishing
