@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pydantic-discriminated"
+version = "0.1.0"
+description = "Type-safe discriminated unions for Pydantic models"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+keywords = ["pydantic", "discriminated", "unions", "polymorphic", "validation", "serialization"]
+authors = [
+    {name = "Talbot Knighton", email = "talbotknighton@gmail.org"},
+]
+maintainers = [
+    {name = "Talbot Knighton", email = "talbotknighton@gmail.org"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/talbotknighton/pydantic-discriminated"
+"Bug Tracker" = "https://github.com/talbotknighton/pydantic-discriminated/issues"
+"Documentation" = "https://github.com/talbotknighton/pydantic-discriminated/blob/main/README.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pydantic_discriminated"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "pydantic_discriminated",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
