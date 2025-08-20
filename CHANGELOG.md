@@ -45,5 +45,6 @@ This will trigger the GitHub Action to build and publish to PyPI
 
 # Change Log
 
+2025-08-20 Added more informative top-level README.md file
 2025-08-20 updated publishing script
 2025-08-20 Added publishing
