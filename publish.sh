@@ -178,7 +178,7 @@ git push origin dev
 
 # Build and deploy documentation locally
 echo "Building and deploying documentation version $VERSION_NO_V locally..."
-mike deploy $VERSION_NO_V latest --update-aliases
+mike deploy "$VERSION_NO_V" --alias latest --update-aliases
 mike set-default latest
 
 echo "Documentation built and deployed locally."
@@ -220,17 +220,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Push documentation to GitHub Pages
-        # echo "Pushing documentation to GitHub Pages..."
-        # mike deploy --push --update-aliases $VERSION_NO_V latest
-        # mike set-default --push latest
-        mike deploy $VERSION_NO_V --alias latest --update-aliases
-        mike set-default latest
+        echo "Pushing documentation to GitHub Pages..."
+        mike deploy "$VERSION_NO_V" --alias latest --update-aliases --push
+        mike set-default latest --push
     else
         echo "Skipping documentation push. You can do this manually later with:"
-        # echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
-        # echo "mike set-default --push latest"
-        mike deploy $VERSION_NO_V --alias latest --update-aliases
-        mike set-default latest
+        echo "mike deploy \"$VERSION_NO_V\" --alias latest --update-aliases --push"
+        echo "mike set-default latest --push"
     fi
     
     # Switch back to dev branch
@@ -245,9 +241,7 @@ else
     echo "git pull origin main"
     echo "git tag -a $VERSION -m \"Release $VERSION\""
     echo "git push origin $VERSION"
-    # echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
-    # echo "mike set-default --push latest"
-    mike deploy $VERSION_NO_V --alias latest --update-aliases
-    mike set-default latest
+    echo "mike deploy \"$VERSION_NO_V\" --alias latest --update-aliases --push"
+    echo "mike set-default latest --push"
     echo "git checkout dev"
 fi
