@@ -7,6 +7,39 @@ Type-safe discriminated unions for Pydantic models.
 [![License](https://img.shields.io/github/license/TalbotKnighton/pydantic-discriminated.svg)](https://github.com/TalbotKnighton/pydantic-discriminated/blob/main/LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://talbotknighton.github.io/pydantic-discriminated/)
 
+## Comparison with Alternatives
+
+### Why pydantic-discriminated?
+
+While several libraries offer partial solutions to handling polymorphic data structures, pydantic-discriminated stands out by providing:
+
+1. **True type safety** that works with IDEs and static type checkers
+2. **Seamless integration** with Pydantic's ecosystem including FastAPI
+3. **Flexible configuration** with per-call control over serialization behavior
+4. **Comprehensive support** for nested models at any level
+5. **Simple API** with an intuitive decorator-based approach
+
+Most alternatives either lack proper type information, don't support nested structures, or require complex manual configuration. pydantic-discriminated solves these limitations with a clean, type-safe API that feels like a natural extension of Pydantic itself.
+
+### Feature Comparison
+
+| Feature | pydantic-discriminated | pydantic TaggedUnion | python-union | pydantic-factories | cattrs + attrs | marshmallow + marshmallow-oneofschema |
+|---------|------------------------|----------------------|--------------|-------------------|---------------|--------------------------------------|
+| **Type Safety** | ✅ Full type-checking support | ⚠️ Limited | ⚠️ Partial | ⚠️ Limited | ⚠️ Partial | ❌ No |
+| **Nested Models** | ✅ Arbitrary nesting levels | ✅ Supported | ❌ Limited | ❌ No | ⚠️ Limited | ⚠️ Limited |
+| **IDE Support** | ✅ Full autocomplete | ⚠️ Partial | ⚠️ Partial | ⚠️ Partial | ⚠️ Partial | ❌ No |
+| **Runtime Control** | ✅ Flexible configuration | ❌ No | ❌ No | ❌ No | ⚠️ Limited | ⚠️ Limited |
+| **OpenAPI Support** | ✅ Complete | ✅ Basic | ⚠️ Manual setup | ❌ No | ❌ No | ⚠️ Partial |
+| **Serialization Control** | ✅ Per-call options | ❌ No | ❌ No | ❌ No | ⚠️ Limited | ⚠️ Limited |
+| **Standard Fields** | ✅ Configurable | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Validation** | ✅ Full Pydantic validation | ✅ Full Pydantic validation | ⚠️ Basic | ⚠️ Limited | ✅ Supported | ✅ Supported |
+| **Enum Support** | ✅ Native Enum integration | ❌ No | ❌ No | ❌ No | ⚠️ Manual | ⚠️ Manual |
+| **Monkey Patching** | ✅ Optional & configurable | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No |
+| **FastAPI Integration** | ✅ Seamless | ⚠️ Basic | ⚠️ Manual setup | ❌ No | ❌ No | ⚠️ Limited |
+| **Learning Curve** | ✅ Simple decorator pattern | ⚠️ Moderate | ⚠️ Moderate | ⚠️ Steep | ⚠️ Steep | ⚠️ Steep |
+| **Pydantic v2 Support** | ✅ Full support | ✅ Supported | ❌ Limited | ⚠️ Partial | ❓ Unknown | ❓ Unknown |
+
+
 ## What are Discriminated Unions?
 
 Discriminated unions (also called tagged unions) let you work with polymorphic data in a type-safe way. A "discriminator" field tells you which concrete type you're dealing with.

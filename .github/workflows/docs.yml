@@ -3,43 +3,37 @@ name: Deploy Documentation
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags (v0.1.0, v1.0.0, etc.)
-
-permissions:
-  contents: write
+      - 'v*.*.*'
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
-  deploy-docs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning
-
+          fetch-depth: 0  # fetch all history for proper versioning
+      
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install mkdocs mkdocs-material mike
-          pip install -e .  # Install the package itself for API docs
-
-      - name: Configure Git user
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
-      - name: Deploy documentation
-        run: |
-          # Extract version from tag (remove the 'v' prefix)
-          VERSION=${GITHUB_REF#refs/tags/v}
+          pip install -e ".[dev]"
           
-          # Setup mkdocs
-          mkdocs build
+      - name: Set up Git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           
-          # Use mike for versioned docs
-          mike deploy --push --update-aliases $VERSION latest
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+          
+      - name: Deploy docs
+        run: |
+          mike deploy --push --update-aliases ${{ env.VERSION }} latest
