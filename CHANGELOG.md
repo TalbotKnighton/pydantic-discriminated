@@ -45,6 +45,7 @@ This will trigger the GitHub Action to build and publish to PyPI
 
 # Change Log
 
+2025-09-21 Continued to work on publishing and mkdocs to get versioning to work
 2025-09-21 Updated publishing process to get consistent version numbers
 2025-08-21 Fixed model_dump_json argument handling and updated publishing methodology
 2025-08-20 Updated docs publishing workflow
