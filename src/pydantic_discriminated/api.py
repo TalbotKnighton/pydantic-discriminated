@@ -13,6 +13,7 @@ The module supports:
 """
 
 from enum import Enum
+import inspect
 from typing import (
     Any,
     Dict,
@@ -185,14 +186,26 @@ def _apply_monkey_patch():
                 f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
             )
 
-            # Use model_dump but make sure to create a copy of kwargs to avoid modifying the original
-            kwargs_copy = kwargs.copy()
-            kwargs_copy["use_discriminators"] = use_discriminators
-            data = self.model_dump(**kwargs_copy)
+            # Get model data with discriminators applied
+            model_dump_kwargs = kwargs.copy()
+            model_dump_kwargs["use_discriminators"] = use_discriminators
 
-            # Convert to JSON
-            encoder = kwargs.pop("encoder", None)
-            return json.dumps(data, default=encoder, **kwargs)
+            # First, get the data with proper discriminator processing
+            data = patched_model_dump(self, **model_dump_kwargs)
+
+            # Get the signature of json.dumps to filter kwargs
+            json_params = set(inspect.signature(json.dumps).parameters.keys())
+
+            # Keep only kwargs that are valid for json.dumps
+            # Add 'encoder' which is handled separately
+            json_params.add("encoder")
+            json_kwargs = {k: v for k, v in kwargs.items() if k in json_params}
+
+            # Handle encoder separately as it's passed as 'default' to json.dumps
+            encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+
+            # Convert to JSON using filtered kwargs
+            return json.dumps(data, default=encoder, **json_kwargs)
 
         # Apply patches
         BaseModel.model_dump = patched_model_dump
