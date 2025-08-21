@@ -4,7 +4,7 @@
 pydantic-discriminated: Type-safe discriminated unions for Pydantic models.
 """
 
-__version__ = "0.1.23"
+__version__ = "0.1.24"
 
 # Import and expose the main components of the API
 from pydantic_discriminated.api import (  # Assuming this is your main module file
