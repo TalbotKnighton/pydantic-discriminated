@@ -53,9 +53,17 @@ rm pyproject.toml.bak  # Remove backup file
 # Update version in __init__.py (accounting for src layout)
 INIT_PATH="src/pydantic_discriminated/__init__.py"
 if [ -f "$INIT_PATH" ]; then
-    echo "Updating version in $INIT_PATH..."
-    sed -i.bak "s/__version__ = \".*\"/__version__ = \"$VERSION_NO_V\"/" "$INIT_PATH"
-    rm "${INIT_PATH}.bak"  # Remove backup file
+    if grep -q "__version__" "$INIT_PATH"; then
+        # Update existing version
+        echo "Updating version in $INIT_PATH..."
+        sed -i.bak "s/__version__ = \".*\"/__version__ = \"$VERSION_NO_V\"/" "$INIT_PATH"
+    else
+        # Add version if it doesn't exist
+        echo "Adding version to $INIT_PATH..."
+        echo "" >> "$INIT_PATH"  # Add a newline
+        echo "__version__ = \"$VERSION_NO_V\"" >> "$INIT_PATH"
+    fi
+    rm -f "${INIT_PATH}.bak"  # Remove backup file if it exists
 else
     echo "Warning: $INIT_PATH not found, skipping version update in __init__.py"
 fi
