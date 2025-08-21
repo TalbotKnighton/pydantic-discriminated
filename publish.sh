@@ -36,6 +36,12 @@ git pull origin dev
 
 # Run unit tests before proceeding
 echo "Running unit tests..."
+echo "Checking if pytest is installed..."
+if ! python -c "import pytest" &>/dev/null; then
+    echo "pytest not found. Installing development dependencies..."
+    pip install -e ".[dev]"  # or: poetry install --with dev
+fi
+
 if ! python -m pytest tests/; then
     echo "Error: Tests failed. Please fix the failing tests before publishing."
     exit 1
