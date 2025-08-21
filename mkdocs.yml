@@ -3,10 +3,13 @@ site_description: Type-safe discriminated unions for Pydantic models
 site_url: https://talbotknighton.github.io/pydantic-discriminated/
 repo_url: https://github.com/TalbotKnighton/pydantic-discriminated
 repo_name: TalbotKnighton/pydantic-discriminated
-# extra:
-#   version:
-#     provider: mike
-#     default: latest
+
+# Uncomment this section to properly configure mike
+extra:
+  version:
+    provider: mike
+    default: latest
+
 theme:
   name: material
   palette:
@@ -24,7 +27,10 @@ theme:
 plugins:
   - search
   - mike: # for versioned docs
+      # IMPORTANT: Change this configuration
       version_selector: true
+      css_dir: css
+      javascript_dir: js
       canonical_version: latest
   - gen-files:
       scripts:
