@@ -12,7 +12,14 @@ dependencies = [
 ]
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["pydantic", "discriminated", "unions", "polymorphic", "validation", "serialization"]
+keywords = [
+    "pydantic", 
+    "discriminated", 
+    "unions", 
+    "polymorphic", 
+    "validation", 
+    "serialization",
+]
 authors = [
     {name = "Talbot Knighton", email = "talbotknighton@gmail.org"},
 ]
@@ -47,6 +54,11 @@ dev = [
     "mkdocs-redirects>=1.0.0",
     "hatchling>=1.11.0",
     "mike",
+    "mkdocstrings[python]>=0.20.0",
+    "mkdocs-literate-nav>=0.6.0",
+    "mkdocs-gen-files>=0.3.0",
+    "mkdocs-section-index>=0.2.0",
+    "mkdocs-material-extensions>=1.0.0",
 ]
 
 [project.urls]

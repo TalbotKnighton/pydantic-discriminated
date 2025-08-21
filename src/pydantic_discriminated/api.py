@@ -122,7 +122,7 @@ def _apply_monkey_patch():
         _original_methods["model_dump_json"] = BaseModel.model_dump_json
 
         # Define new methods that use the originals
-        def patched_model_dump(self, **kwargs):
+        def patched_model_dump(self, **kwargs: Any) -> Dict[str, Any]:
             """
             Patched version of model_dump that handles discriminator fields.
 
@@ -161,7 +161,7 @@ def _apply_monkey_patch():
                 # Process it to REMOVE discriminators from nested models
                 return _process_discriminators(self, result, use_discriminators=False)
 
-        def patched_model_dump_json(self, **kwargs):
+        def patched_model_dump_json(self, **kwargs: Any) -> str:
             """
             Patched version of model_dump_json that handles discriminator fields.
 
@@ -423,7 +423,7 @@ class DiscriminatorAwareBaseModel(BaseModel):
         >>> data = container.model_dump()  # Will include discriminator fields
     """
 
-    def model_dump(self, **kwargs):
+    def model_dump(self, **kwargs: Any) -> Dict[str, Any]:
         """
         Override model_dump to include discriminators at all nesting levels.
 
@@ -434,7 +434,7 @@ class DiscriminatorAwareBaseModel(BaseModel):
             **kwargs: Keyword arguments to pass to the parent model_dump method.
 
         Returns:
-            dict: The serialized model with discriminator fields included.
+            (dict): The serialized model with discriminator fields included.
         """
         # Always use discriminators for this class by setting the flag
         kwargs["use_discriminators"] = True
@@ -448,7 +448,7 @@ class DiscriminatorAwareBaseModel(BaseModel):
             result = super().model_dump(**kwargs)
             return _process_discriminators(self, result)
 
-    def model_dump_json(self, **kwargs):
+    def model_dump_json(self, **kwargs: Any) -> str:
         """
         Override model_dump_json to include discriminators at all nesting levels.
 
@@ -459,7 +459,7 @@ class DiscriminatorAwareBaseModel(BaseModel):
             **kwargs: Keyword arguments to pass to the parent model_dump_json method.
 
         Returns:
-            str: The JSON string representation of the model with discriminator fields included.
+            (str): The JSON string representation of the model with discriminator fields included.
         """
         # Always use discriminators for this class
         kwargs["use_discriminators"] = True
@@ -503,7 +503,7 @@ class DiscriminatedBaseModel(BaseModel):
     _discriminator_value: ClassVar[Any] = None
     _use_standard_fields: ClassVar[bool] = DiscriminatedConfig.use_standard_fields
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         """
         Custom attribute access to handle discriminator field.
 
@@ -511,14 +511,14 @@ class DiscriminatedBaseModel(BaseModel):
         field name, as well as through the standard discriminator fields.
 
         Args:
-            name: The attribute name being accessed.
+            name (str): The attribute name being accessed.
 
         Returns:
-            The discriminator value if name is the discriminator field or a standard
+            (Any): The discriminator value if name is the discriminator field or a standard
             discriminator field, otherwise raises AttributeError.
 
         Raises:
-            AttributeError: If the attribute doesn't exist and isn't a discriminator field.
+            (AttributeError): If the attribute doesn't exist and isn't a discriminator field.
         """
         # Handle access to the legacy discriminator field
         if name == self._discriminator_field:
@@ -533,7 +533,7 @@ class DiscriminatedBaseModel(BaseModel):
         # Default behavior for other attributes
         return super().__getattr__(name)
 
-    def model_dump(self, **kwargs):
+    def model_dump(self, **kwargs: Any):
         """
         Override model_dump to control when discriminators are included.
 
@@ -547,7 +547,7 @@ class DiscriminatedBaseModel(BaseModel):
                 the global setting.
 
         Returns:
-            dict: The serialized model with discriminator fields included or excluded
+            (dict): The serialized model with discriminator fields included or excluded
                 based on configuration.
         """
         # Extract our custom parameter or use the global setting
@@ -582,7 +582,7 @@ class DiscriminatedBaseModel(BaseModel):
         return data
 
     @model_serializer
-    def serialize_model(self):
+    def serialize_model(self) -> Dict[str, Any]:
         """
         Custom serializer that includes discriminator fields only when requested.
 
@@ -591,7 +591,7 @@ class DiscriminatedBaseModel(BaseModel):
         filtered out by model_dump if needed.
 
         Returns:
-            dict: Dictionary representation of the model, including discriminator fields.
+            (dict): Dictionary representation of the model, including discriminator fields.
         """
         # Get all field values without special handling
         data = {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
@@ -609,7 +609,7 @@ class DiscriminatedBaseModel(BaseModel):
         return data
 
     @classmethod
-    def model_validate(cls: Type[T], obj: Any, **kwargs) -> T:
+    def model_validate(cls: Type[T], obj: Any, **kwargs: Any) -> T:
         """
         Validate the given object and return an instance of this model.
 
@@ -707,7 +707,7 @@ class DiscriminatedBaseModel(BaseModel):
         return instance
 
     @classmethod
-    def model_validate_json(cls: Type[T], json_data: Union[str, bytes], **kwargs) -> T:
+    def model_validate_json(cls: Type[T], json_data: Union[str, bytes], **kwargs: Any) -> T:
         """
         Validate the given JSON data and return an instance of this model.
 

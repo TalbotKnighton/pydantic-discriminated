@@ -118,6 +118,14 @@ git commit -m "Bump version to $VERSION"
 echo "Pushing changes to dev branch..."
 git push origin dev
 
+# Build and deploy documentation locally
+echo "Building and deploying documentation version $VERSION_NO_V locally..."
+mike deploy $VERSION_NO_V latest --update-aliases
+mike set-default latest
+
+echo "Documentation built and deployed locally."
+echo "To view the documentation locally, run: mike serve"
+
 # Create pull request from dev to main
 echo "Creating a pull request from dev to main..."
 echo "Please go to GitHub and create the PR: https://github.com/TalbotKnighton/pydantic-discriminated/compare/main...dev"
@@ -145,12 +153,18 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     git tag -a $VERSION -m "Release $VERSION"
     git push origin $VERSION
     
+    # Push documentation to GitHub Pages
+    echo "Pushing documentation to GitHub Pages..."
+    mike deploy --push --update-aliases $VERSION_NO_V latest
+    mike set-default --push latest
+    
     # Switch back to dev branch
     echo "Switching back to dev branch..."
     git checkout dev
     
     echo "Release process completed successfully!"
     echo "The GitHub Actions workflow should now be building and publishing your package."
+    echo "Documentation has been deployed to GitHub Pages."
     echo "You can check the progress here: https://github.com/TalbotKnighton/pydantic-discriminated/actions"
 else
     echo "Please complete the PR process and then run:"
@@ -158,5 +172,7 @@ else
     echo "git pull origin main"
     echo "git tag -a $VERSION -m \"Release $VERSION\""
     echo "git push origin $VERSION"
+    echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
+    echo "mike set-default --push latest"
     echo "git checkout dev"
 fi
