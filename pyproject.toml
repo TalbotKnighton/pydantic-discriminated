@@ -54,12 +54,14 @@ dev = [
 "Bug Tracker" = "https://github.com/talbotknighton/pydantic-discriminated/issues"
 "Documentation" = "https://github.com/talbotknighton/pydantic-discriminated/blob/main/README.md"
 
-# Updated this section to use the src directory
+# Configure src directory as a source
+[tool.hatch.build]
+packages = ["src"]
+
+# This will ensure the package is installed as pydantic_discriminated
 [tool.hatch.build.targets.wheel]
 packages = ["src/pydantic_discriminated"]
-directory = "."
 
-# Updated this section to include the src directory
 [tool.hatch.build.targets.sdist]
 include = [
     "src",
@@ -83,18 +85,7 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 
-[tool.pytest]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_functions = "test_*"
-python_classes = "Test*"
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
-]
-
 [tool.pytest.ini_options]
-# Added src to the pythonpath
 pythonpath = [".", "src"]
 minversion = "6.0"
 addopts = "--cov=src/pydantic_discriminated --cov-report=term-missing --cov-report=xml"
