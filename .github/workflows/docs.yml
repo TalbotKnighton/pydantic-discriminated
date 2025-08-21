@@ -1,3 +1,4 @@
+# .github/workflows/docs.yml
 name: Deploy Documentation
 
 on:
@@ -5,6 +6,9 @@ on:
     tags:
       - 'v*.*.*'
   workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: write  # This is the key addition - explicitly grant write permission
 
 jobs:
   deploy:

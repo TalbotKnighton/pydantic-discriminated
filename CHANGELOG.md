@@ -45,6 +45,7 @@ This will trigger the GitHub Action to build and publish to PyPI
 
 # Change Log
 
+2025-08-20 Updated docs publishing workflow
 2025-08-20 Updated docs publishing and page format
 2025-08-20 Updated gitignore to exclude pytest output files
 2025-08-20 Updated publish script for new folder structure using src directory
