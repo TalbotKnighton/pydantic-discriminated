@@ -91,6 +91,44 @@ else
     echo "Warning: $INIT_PATH not found, skipping version update in __init__.py"
 fi
 
+# Update documentation URL in pyproject.toml to point to the docs site
+echo "Updating documentation URL in pyproject.toml..."
+sed -i.bak 's|"Documentation" = ".*"|"Documentation" = "https://talbotknighton.github.io/pydantic-discriminated/"|' pyproject.toml
+rm pyproject.toml.bak  # Remove backup file
+
+# Check if email in pyproject.toml contains .org and fix it if needed
+if grep -q "talbotknighton@gmail.org" pyproject.toml; then
+    echo "Fixing email address in pyproject.toml..."
+    sed -i.bak 's/talbotknighton@gmail.org/talbotknighton@gmail.com/g' pyproject.toml
+    rm pyproject.toml.bak  # Remove backup file
+fi
+
+# Update README.md if it contains badge.fury.io badges
+if [ -f "README.md" ] && grep -q "badge.fury.io" README.md; then
+    echo "Updating badges in README.md..."
+    sed -i.bak 's|https://badge.fury.io/py/pydantic-discriminated.svg|https://img.shields.io/pypi/v/pydantic-discriminated.svg|g' README.md
+    sed -i.bak 's|https://badge.fury.io/py/pydantic-discriminated|https://pypi.org/project/pydantic-discriminated/|g' README.md
+    rm README.md.bak  # Remove backup file
+fi
+
+# Update docs/index.md badges if needed
+if [ -f "docs/index.md" ]; then
+    echo "Checking badges in docs/index.md..."
+    if grep -q "badge.fury.io" docs/index.md; then
+        echo "Updating PyPI badge in docs/index.md..."
+        sed -i.bak 's|https://badge.fury.io/py/pydantic-discriminated.svg|https://img.shields.io/pypi/v/pydantic-discriminated.svg|g' docs/index.md
+        sed -i.bak 's|https://badge.fury.io/py/pydantic-discriminated|https://pypi.org/project/pydantic-discriminated/|g' docs/index.md
+        rm docs/index.md.bak  # Remove backup file
+    fi
+    
+    # Update documentation badge to be more useful (not link to itself)
+    if grep -q "docs-mkdocs-blue" docs/index.md; then
+        echo "Updating documentation badge in docs/index.md..."
+        sed -i.bak 's|[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://talbotknighton.github.io/pydantic-discriminated/)|[![API Reference](https://img.shields.io/badge/api-reference-blue.svg)](https://talbotknighton.github.io/pydantic-discriminated/api-reference/)|g' docs/index.md
+        rm docs/index.md.bak  # Remove backup file
+    fi
+fi
+
 # Update changelog if it exists
 if [ -f "CHANGELOG.md" ]; then
     echo "Adding new version entry to CHANGELOG.md..."
@@ -103,9 +141,26 @@ if [ -f "CHANGELOG.md" ]; then
     ${EDITOR:-vi} CHANGELOG.md
 fi
 
+# Check for consistency in version numbers
+echo "Checking for version consistency..."
+PYPROJECT_VERSION=$(grep "^version = " pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+INIT_VERSION=$(grep "__version__" "$INIT_PATH" 2>/dev/null | sed 's/__version__ = "\(.*\)"/\1/')
+
+if [ "$PYPROJECT_VERSION" != "$VERSION_NO_V" ]; then
+    echo "Error: Version in pyproject.toml ($PYPROJECT_VERSION) doesn't match requested version ($VERSION_NO_V)"
+    exit 1
+fi
+
+if [ -n "$INIT_VERSION" ] && [ "$INIT_VERSION" != "$VERSION_NO_V" ]; then
+    echo "Error: Version in $INIT_PATH ($INIT_VERSION) doesn't match requested version ($VERSION_NO_V)"
+    exit 1
+fi
+
+echo "Version consistency check passed."
+
 # Commit the version changes
 echo "Committing version changes..."
-git add pyproject.toml
+git add pyproject.toml README.md docs/index.md
 if [ -f "$INIT_PATH" ]; then
     git add "$INIT_PATH"
 fi
@@ -153,19 +208,30 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     git tag -a $VERSION -m "Release $VERSION"
     git push origin $VERSION
     
-    # # Push documentation to GitHub Pages
-    # echo "Pushing documentation to GitHub Pages..."
-    # mike deploy --push --update-aliases $VERSION_NO_V latest
-    # mike set-default --push latest
+    # Wait for the package to be published to PyPI
+    echo "Waiting for package to be published to PyPI..."
+    echo "This may take a few minutes. The GitHub Actions workflow should be building and publishing your package."
+    echo "You can check the progress here: https://github.com/TalbotKnighton/pydantic-discriminated/actions"
+    
+    read -p "Has the package been published to PyPI? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        # Push documentation to GitHub Pages
+        echo "Pushing documentation to GitHub Pages..."
+        mike deploy --push --update-aliases $VERSION_NO_V latest
+        mike set-default --push latest
+    else
+        echo "Skipping documentation push. You can do this manually later with:"
+        echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
+        echo "mike set-default --push latest"
+    fi
     
     # Switch back to dev branch
     echo "Switching back to dev branch..."
     git checkout dev
     
     echo "Release process completed successfully!"
-    echo "The GitHub Actions workflow should now be building and publishing your package."
     echo "Documentation has been deployed to GitHub Pages."
-    echo "You can check the progress here: https://github.com/TalbotKnighton/pydantic-discriminated/actions"
 else
     echo "Please complete the PR process and then run:"
     echo "git checkout main"
