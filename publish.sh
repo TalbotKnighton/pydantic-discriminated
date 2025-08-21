@@ -24,7 +24,26 @@ if [ "$CURRENT_BRANCH" != "dev" ]; then
     exit 1
 fi
 
-# Make sure the working directory is clean
+# Make sure test output files are in .gitignore
+if ! grep -q "discriminator_tests.json" .gitignore 2>/dev/null; then
+    echo "Adding test output files to .gitignore..."
+    cat >> .gitignore << EOF
+# Test output files
+discriminator_tests.json
+discriminator_tests.log
+.coverage
+coverage.xml
+EOF
+    git add .gitignore
+    git commit -m "Add test output files to .gitignore"
+    echo "Updated .gitignore and committed changes."
+fi
+
+# Clean up any test output files that might interfere with branch switching
+echo "Cleaning up test output files..."
+rm -f discriminator_tests.json discriminator_tests.log .coverage coverage.xml
+
+# Make sure the working directory is clean (except for ignored files)
 if ! git diff-index --quiet HEAD --; then
     echo "Error: Working directory has uncommitted changes"
     exit 1
@@ -44,6 +63,10 @@ if ! python -m pytest; then
     exit 1
 fi
 echo "All tests passed successfully!"
+
+# Clean up test output files again
+echo "Cleaning up test output files..."
+rm -f discriminator_tests.json discriminator_tests.log .coverage coverage.xml
 
 # Update version in pyproject.toml
 echo "Updating version in pyproject.toml to $VERSION_NO_V..."
@@ -108,6 +131,10 @@ echo "git push origin $VERSION"
 read -p "Has the PR been merged to main? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Clean up test output files again to ensure branch switching works
+    echo "Cleaning up test output files..."
+    rm -f discriminator_tests.json discriminator_tests.log .coverage coverage.xml
+    
     # Switch to main and pull latest changes
     echo "Switching to main branch and pulling latest changes..."
     git checkout main
