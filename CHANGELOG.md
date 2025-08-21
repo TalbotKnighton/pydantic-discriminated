@@ -45,6 +45,7 @@ This will trigger the GitHub Action to build and publish to PyPI
 
 # Change Log
 
+2025-08-20 Updated gitignore to exclude pytest output files
 2025-08-20 Updated publish script for new folder structure using src directory
 2025-08-20 Added lots of doc strings to api code
 2025-08-20 Improved code architecture to allow usage nested inside of pydantic BaseModel via optional monkey patching
