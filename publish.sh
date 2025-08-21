@@ -34,6 +34,14 @@ fi
 echo "Pulling latest changes from dev branch..."
 git pull origin dev
 
+# Run unit tests before proceeding
+echo "Running unit tests..."
+if ! python -m pytest tests/; then
+    echo "Error: Tests failed. Please fix the failing tests before publishing."
+    exit 1
+fi
+echo "All tests passed successfully!"
+
 # Update version in pyproject.toml
 echo "Updating version in pyproject.toml to $VERSION_NO_V..."
 sed -i.bak "s/^version = \".*\"/version = \"$VERSION_NO_V\"/" pyproject.toml
