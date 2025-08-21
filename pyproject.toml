@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pydantic-discriminated"
-version = "0.1.11"
+version = "0.1.12"
 description = "Type-safe discriminated unions for Pydantic models"
 requires-python = ">=3.8"
 dependencies = [
@@ -21,10 +21,10 @@ keywords = [
     "serialization",
 ]
 authors = [
-    {name = "Talbot Knighton", email = "talbotknighton@gmail.org"},
+    {name = "Talbot Knighton", email = "talbotknighton@gmail.com"},
 ]
 maintainers = [
-    {name = "Talbot Knighton", email = "talbotknighton@gmail.org"},
+    {name = "Talbot Knighton", email = "talbotknighton@gmail.com"},
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -64,7 +64,9 @@ dev = [
 [project.urls]
 "Homepage" = "https://github.com/talbotknighton/pydantic-discriminated"
 "Bug Tracker" = "https://github.com/talbotknighton/pydantic-discriminated/issues"
-"Documentation" = "https://github.com/talbotknighton/pydantic-discriminated/blob/main/README.md"
+"Documentation" = "https://talbotknighton.github.io/pydantic-discriminated/"
+"Source Code" = "https://github.com/talbotknighton/pydantic-discriminated"
+"PyPI" = "https://pypi.org/project/pydantic-discriminated/"
 
 # Configure src directory as a source
 [tool.hatch.build]
