@@ -4,10 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pydantic-discriminated"
-version = "0.1.3"
+version = "0.1.4"
 description = "Type-safe discriminated unions for Pydantic models"
-readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+    "pydantic>=2.0.0",
+]
+readme = "README.md"
 license = {text = "MIT"}
 keywords = ["pydantic", "discriminated", "unions", "polymorphic", "validation", "serialization"]
 authors = [
@@ -20,6 +23,7 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -28,9 +32,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
-]
-dependencies = [
-    "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -53,12 +54,15 @@ dev = [
 "Bug Tracker" = "https://github.com/talbotknighton/pydantic-discriminated/issues"
 "Documentation" = "https://github.com/talbotknighton/pydantic-discriminated/blob/main/README.md"
 
+# Updated this section to use the src directory
 [tool.hatch.build.targets.wheel]
-packages = ["pydantic_discriminated"]
+packages = ["src/pydantic_discriminated"]
+directory = "."
 
+# Updated this section to include the src directory
 [tool.hatch.build.targets.sdist]
 include = [
-    "pydantic_discriminated",
+    "src",
     "LICENSE",
     "README.md",
     "pyproject.toml",
@@ -90,9 +94,10 @@ filterwarnings = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+# Added src to the pythonpath
+pythonpath = [".", "src"]
 minversion = "6.0"
-addopts = "--cov=pydantic_discriminated --cov-report=term-missing --cov-report=xml"
+addopts = "--cov=src/pydantic_discriminated --cov-report=term-missing --cov-report=xml"
 log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
