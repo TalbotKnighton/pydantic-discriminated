@@ -50,11 +50,14 @@ echo "Updating version in pyproject.toml to $VERSION_NO_V..."
 sed -i.bak "s/^version = \".*\"/version = \"$VERSION_NO_V\"/" pyproject.toml
 rm pyproject.toml.bak  # Remove backup file
 
-# Update version in __init__.py (if it exists)
-if [ -f "pydantic_discriminated/__init__.py" ]; then
-    echo "Updating version in __init__.py..."
-    sed -i.bak "s/__version__ = \".*\"/__version__ = \"$VERSION_NO_V\"/" pydantic_discriminated/__init__.py
-    rm pydantic_discriminated/__init__.py.bak  # Remove backup file
+# Update version in __init__.py (accounting for src layout)
+INIT_PATH="src/pydantic_discriminated/__init__.py"
+if [ -f "$INIT_PATH" ]; then
+    echo "Updating version in $INIT_PATH..."
+    sed -i.bak "s/__version__ = \".*\"/__version__ = \"$VERSION_NO_V\"/" "$INIT_PATH"
+    rm "${INIT_PATH}.bak"  # Remove backup file
+else
+    echo "Warning: $INIT_PATH not found, skipping version update in __init__.py"
 fi
 
 # Update changelog if it exists
@@ -72,8 +75,8 @@ fi
 # Commit the version changes
 echo "Committing version changes..."
 git add pyproject.toml
-if [ -f "pydantic_discriminated/__init__.py" ]; then
-    git add pydantic_discriminated/__init__.py
+if [ -f "$INIT_PATH" ]; then
+    git add "$INIT_PATH"
 fi
 if [ -f "CHANGELOG.md" ]; then
     git add CHANGELOG.md
