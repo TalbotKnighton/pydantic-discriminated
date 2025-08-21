@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pydantic-discriminated"
-version = "0.1.21"
+version = "0.1.23"
 description = "Type-safe discriminated unions for Pydantic models"
 requires-python = ">=3.8"
 dependencies = [
