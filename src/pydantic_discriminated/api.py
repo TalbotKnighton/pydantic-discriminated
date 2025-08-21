@@ -777,16 +777,147 @@ def _apply_monkey_patch():
 #         return result
 #     # Handle other types
 #     return data
+# def _process_discriminators(model, data, use_discriminators=True):
+#     """
+#     Process data to add or remove discriminators for nested models.
+
+#     This function recursively processes a data structure to add or remove discriminator
+#     fields from discriminated models at all nesting levels. It handles any type of
+#     Python collection including dictionaries, lists, tuples, sets, and custom iterables.
+
+#     Args:
+#         model: The model instance that produced the data.
+#         data: The data to process (any type).
+#         use_discriminators: Whether to include discriminator fields. Defaults to True.
+
+#     Returns:
+#         The processed data with discriminators added or removed according to the
+#         use_discriminators parameter.
+#     """
+#     print(
+#         f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
+#     )
+
+#     # Get all known discriminator field names from the registry
+#     known_discriminator_fields = set(DiscriminatedModelRegistry._registry.keys())
+#     # Add standard fields to the set
+#     standard_fields = {
+#         DiscriminatedConfig.standard_category_field,
+#         DiscriminatedConfig.standard_value_field,
+#     }
+
+#     def process_value(value, parent_model=None, field_name=None):
+#         """
+#         Process any value recursively, handling collection types appropriately.
+
+#         Args:
+#             value: The value to process.
+#             parent_model: The model that contains this value, if available.
+#             field_name: The field name in the parent model, if available.
+
+#         Returns:
+#             Processed value with discriminators handled appropriately.
+#         """
+#         # Handle different types of values
+#         if isinstance(value, dict):
+#             return process_dict(value, parent_model)
+#         elif isinstance(value, (list, tuple, set)):
+#             return process_collection(value, parent_model, field_name)
+#         else:
+#             # For non-collection types, return as is
+#             return value
+
+#     def process_dict(d, parent_model=None):
+#         """
+#         Process a dictionary, handling discriminator fields appropriately.
+
+#         Args:
+#             d: The dictionary to process.
+#             parent_model: The model that contains this dictionary, if available.
+
+#         Returns:
+#             Processed dictionary with discriminators handled appropriately.
+#         """
+#         if not isinstance(d, dict):
+#             return d
+
+#         result = {}
+#         for key, value in d.items():
+#             # Check if this key is a discriminator field
+#             is_discriminator = key in known_discriminator_fields or key in standard_fields
+
+#             # Handle based on whether we want discriminators and what type the value is
+#             if is_discriminator and not use_discriminators:
+#                 # Skip discriminator fields when not wanted
+#                 continue
+#             else:
+#                 # Get the field model if available
+#                 field_model = getattr(parent_model, key, None) if parent_model else None
+#                 # Process the value recursively
+#                 result[key] = process_value(value, field_model, key)
+
+#         return result
+
+#     def process_collection(collection, parent_model=None, field_name=None):
+#         """
+#         Process any collection type (list, tuple, set, etc.), handling items appropriately.
+
+#         Args:
+#             collection: The collection to process.
+#             parent_model: The model that contains this collection, if available.
+#             field_name: The field name in the parent model, if available.
+
+#         Returns:
+#             Processed collection with discriminators handled appropriately.
+#         """
+#         # Try to get the collection field from the parent model
+#         original_items = []
+#         if parent_model and field_name:
+#             original_field = getattr(parent_model, field_name, None)
+#             if isinstance(original_field, (list, tuple, set)):
+#                 original_items = list(original_field)
+
+#         # Create results of the same type as the input
+#         result_items = []
+
+#         # Process each item
+#         for i, item in enumerate(collection):
+#             # Try to get original model for this item
+#             original_model = original_items[i] if i < len(original_items) else None
+
+#             # Process the item recursively
+#             processed_item = process_value(item, original_model, None)
+#             result_items.append(processed_item)
+
+#         # Convert result back to the original collection type
+#         if isinstance(collection, list):
+#             return result_items
+#         elif isinstance(collection, tuple):
+#             return tuple(result_items)
+#         elif isinstance(collection, set):
+#             return set(result_items)
+#         else:
+#             # For any other collection type, try to instantiate with the processed items
+#             # Fall back to returning a list if that fails
+#             try:
+#                 return type(collection)(result_items)
+#             except Exception:
+#                 return result_items
+
+
+#     # Start processing from the top level
+#     return process_value(data, model)
 def _process_discriminators(model, data, use_discriminators=True):
     """
     Process data to add or remove discriminators for nested models.
 
     This function recursively processes a data structure to add or remove discriminator
     fields from discriminated models at all nesting levels. It handles any type of
-    Python collection including dictionaries, lists, tuples, sets, and custom iterables.
+    Python collection including dictionaries, lists, tuples, sets, custom iterables,
+    and objects from annotations with custom serializers (like pandas Series).
 
     Args:
-        model: The model instance that produced the data.
+        model: The model instance or object that produced the data.
         data: The data to process (any type).
         use_discriminators: Whether to include discriminator fields. Defaults to True.
 
@@ -806,34 +937,85 @@ def _process_discriminators(model, data, use_discriminators=True):
         DiscriminatedConfig.standard_value_field,
     }
 
-    def process_value(value, parent_model=None, field_name=None):
+    def safe_get_attribute(obj, key):
+        """
+        Safely get an attribute or item from an object, handling different types.
+
+        This function tries multiple approaches to get a value from an object:
+        1. Direct attribute access (for Pydantic models and regular objects)
+        2. Dictionary-style access (for dicts, pandas Series, etc.)
+        3. Method calls like .get() (for dicts, pandas Series, etc.)
+
+        Args:
+            obj: The object to get the attribute/item from.
+            key: The attribute/key name.
+
+        Returns:
+            The attribute/item value, or None if not found or an error occurs.
+        """
+        # Skip None objects
+        if obj is None:
+            return None
+
+        # Try multiple methods to get the attribute/item
+        try:
+            # First try direct attribute access (for models)
+            if hasattr(obj, key):
+                return getattr(obj, key)
+        except (TypeError, AttributeError):
+            pass
+
+        try:
+            # Try dictionary-style access (for dicts and dict-like objects)
+            if hasattr(obj, "__getitem__"):
+                try:
+                    return obj[key]
+                except (KeyError, IndexError, TypeError):
+                    pass
+        except Exception:
+            pass
+
+        try:
+            # Try .get method (for dicts, pandas Series, etc.)
+            if hasattr(obj, "get") and callable(obj.get):
+                try:
+                    return obj.get(key)
+                except (KeyError, TypeError):
+                    pass
+        except Exception:
+            pass
+
+        # If all methods fail, return None
+        return None
+
+    def process_value(value, parent_obj=None, field_name=None):
         """
         Process any value recursively, handling collection types appropriately.
 
         Args:
             value: The value to process.
-            parent_model: The model that contains this value, if available.
-            field_name: The field name in the parent model, if available.
+            parent_obj: The object that contains this value, if available.
+            field_name: The field name in the parent object, if available.
 
         Returns:
             Processed value with discriminators handled appropriately.
         """
         # Handle different types of values
         if isinstance(value, dict):
-            return process_dict(value, parent_model)
+            return process_dict(value, parent_obj)
         elif isinstance(value, (list, tuple, set)):
-            return process_collection(value, parent_model, field_name)
+            return process_collection(value, parent_obj, field_name)
         else:
             # For non-collection types, return as is
             return value
 
-    def process_dict(d, parent_model=None):
+    def process_dict(d, parent_obj=None):
         """
         Process a dictionary, handling discriminator fields appropriately.
 
         Args:
             d: The dictionary to process.
-            parent_model: The model that contains this dictionary, if available.
+            parent_obj: The object that contains this dictionary, if available.
 
         Returns:
             Processed dictionary with discriminators handled appropriately.
@@ -851,42 +1033,44 @@ def _process_discriminators(model, data, use_discriminators=True):
                 # Skip discriminator fields when not wanted
                 continue
             else:
-                # Get the field model if available
-                field_model = getattr(parent_model, key, None) if parent_model else None
+                # Get the field from the parent object if available
+                field_value = safe_get_attribute(parent_obj, key)
+
                 # Process the value recursively
-                result[key] = process_value(value, field_model, key)
+                result[key] = process_value(value, field_value, key)
 
         return result
 
-    def process_collection(collection, parent_model=None, field_name=None):
+    def process_collection(collection, parent_obj=None, field_name=None):
         """
         Process any collection type (list, tuple, set, etc.), handling items appropriately.
 
         Args:
             collection: The collection to process.
-            parent_model: The model that contains this collection, if available.
-            field_name: The field name in the parent model, if available.
+            parent_obj: The object that contains this collection, if available.
+            field_name: The field name in the parent object, if available.
 
         Returns:
             Processed collection with discriminators handled appropriately.
         """
-        # Try to get the collection field from the parent model
+        # Try to get the collection field from the parent object
+        original_field = safe_get_attribute(parent_obj, field_name)
         original_items = []
-        if parent_model and field_name:
-            original_field = getattr(parent_model, field_name, None)
-            if isinstance(original_field, (list, tuple, set)):
-                original_items = list(original_field)
+
+        # Convert original field to a list if it's a collection
+        if isinstance(original_field, (list, tuple, set)):
+            original_items = list(original_field)
 
         # Create results of the same type as the input
         result_items = []
 
         # Process each item
         for i, item in enumerate(collection):
-            # Try to get original model for this item
-            original_model = original_items[i] if i < len(original_items) else None
+            # Try to get original object for this item
+            original_item = original_items[i] if i < len(original_items) else None
 
             # Process the item recursively
-            processed_item = process_value(item, original_model, None)
+            processed_item = process_value(item, original_item, None)
             result_items.append(processed_item)
 
         # Convert result back to the original collection type
