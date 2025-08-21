@@ -5,7 +5,8 @@ A robust, type-safe implementation of discriminated unions for Pydantic models.
 [![PyPI version](https://img.shields.io/pypi/v/pydantic-discriminated.svg)](https://pypi.org/project/pydantic-discriminated/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pydantic-discriminated.svg)](https://pypi.org/project/pydantic-discriminated/)
 [![License](https://img.shields.io/github/license/TalbotKnighton/pydantic-discriminated.svg)](https://github.com/TalbotKnighton/pydantic-discriminated/blob/main/LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://talbotknighton.github.io/pydantic-discriminated/latest/)
+[![Documentation](https://img.shields.io/badge/docs-latest-blue.svg)](https://talbotknighton.github.io/pydantic-discriminated/)
+[![GitHub](https://img.shields.io/github/stars/TalbotKnighton/pydantic-discriminated?style=social)](https://github.com/TalbotKnighton/pydantic-discriminated)
 
 ## What are Discriminated Unions?
 

@@ -111,6 +111,9 @@ if [ -f "README.md" ] && grep -q "badge.fury.io" README.md; then
     rm README.md.bak  # Remove backup file
 fi
 
+# Make sure to add README.md to the commit
+git add README.md
+
 # Update docs/index.md badges if needed
 if [ -f "docs/index.md" ]; then
     echo "Checking badges in docs/index.md..."
@@ -217,13 +220,17 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         # Push documentation to GitHub Pages
-        echo "Pushing documentation to GitHub Pages..."
-        mike deploy --push --update-aliases $VERSION_NO_V latest
-        mike set-default --push latest
+        # echo "Pushing documentation to GitHub Pages..."
+        # mike deploy --push --update-aliases $VERSION_NO_V latest
+        # mike set-default --push latest
+        mike deploy $VERSION_NO_V --alias latest --update-aliases
+        mike set-default latest
     else
         echo "Skipping documentation push. You can do this manually later with:"
-        echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
-        echo "mike set-default --push latest"
+        # echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
+        # echo "mike set-default --push latest"
+        mike deploy $VERSION_NO_V --alias latest --update-aliases
+        mike set-default latest
     fi
     
     # Switch back to dev branch
@@ -238,7 +245,9 @@ else
     echo "git pull origin main"
     echo "git tag -a $VERSION -m \"Release $VERSION\""
     echo "git push origin $VERSION"
-    echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
-    echo "mike set-default --push latest"
+    # echo "mike deploy --push --update-aliases $VERSION_NO_V latest"
+    # echo "mike set-default --push latest"
+    mike deploy $VERSION_NO_V --alias latest --update-aliases
+    mike set-default latest
     echo "git checkout dev"
 fi
