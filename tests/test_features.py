@@ -111,6 +111,229 @@ class DiscriminatorTests(unittest.TestCase):
         DiscriminatedConfig.enable_monkey_patching()
         logger.debug("Test teardown complete - monkey patching reset to enabled")
 
+    def test_serialization_performance(self):
+        """Test that the patching doesn't significantly impact performance"""
+        import time
+
+        # Create a complex model
+        dogs = [Dog(name=f"Dog{i}", breed="Breed") for i in range(100)]
+        cats = [Cat(name=f"Cat{i}", lives_left=9) for i in range(100)]
+
+        class BigShelter(BaseModel):
+            dogs: List[Dog]
+            cats: List[Cat]
+
+        shelter = BigShelter(dogs=dogs, cats=cats)
+
+        # Measure time with discriminators
+        start = time.time()
+        _ = shelter.model_dump()
+        end = time.time()
+        with_disc_time = end - start
+
+        # Measure time without discriminators
+        start = time.time()
+        _ = shelter.model_dump(use_discriminators=False)
+        end = time.time()
+        without_disc_time = end - start
+
+        # Log the times
+        logger.info(f"Serialization time with discriminators: {with_disc_time:.6f}s")
+        logger.info(f"Serialization time without discriminators: {without_disc_time:.6f}s")
+
+        # We don't assert on exact times, but log for awareness
+
+    def test_custom_json_encoder(self):
+        """Test using a custom JSON encoder with model_dump_json"""
+        from datetime import datetime
+
+        class ModelWithDateTime(BaseModel):
+            name: str
+            timestamp: datetime
+
+        model = ModelWithDateTime(name="Test", timestamp=datetime(2023, 1, 1))
+
+        # Custom encoder function
+        def custom_encoder(obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+        # Test with custom encoder
+        json_str = model.model_dump_json(encoder=custom_encoder)
+        data = json.loads(json_str)
+
+        # Verify the datetime was properly encoded
+        self.assertEqual(data["timestamp"], "2023-01-01T00:00:00")
+
+    def test_json_serialization_edge_cases(self):
+        """Test JSON serialization with complex nested structures and edge cases"""
+        # Create models with nested structures
+        dog = Dog(name="Rex", breed="German Shepherd")
+        cat = Cat(name="Whiskers", lives_left=9)
+
+        class ComplexContainer(BaseModel):
+            animals: List[Union[Dog, Cat]]
+            empty_list: List[str] = []
+            none_value: Optional[str] = None
+            nested_dict: Dict[str, Any] = {"key": {"nested": None}}  # Initialize with None
+
+        # Create the container and set nested structure after initialization
+        container = ComplexContainer(animals=[dog, cat])
+        # We need to manually set this after creation to avoid validation issues
+        container.nested_dict = {"key": {"nested": [dog, None, cat]}}
+
+        logger.debug("Testing JSON serialization with complex nested structures")
+
+        # First verify discriminators are present by default
+        json_str = container.model_dump_json(indent=2)
+        logger.debug(f"Default JSON serialization:\n{json_str}")
+        data = json.loads(json_str)
+
+        # Check first level discriminators
+        self.assertIn(
+            "animal_type",
+            data["animals"][0],
+            "Discriminator should be present in first level by default",
+        )
+
+        # Check nested discriminators
+        self.assertIn(
+            "animal_type",
+            data["nested_dict"]["key"]["nested"][0],
+            "Discriminator should be present in nested structures by default",
+        )
+        self.assertIn(
+            "animal_type",
+            data["nested_dict"]["key"]["nested"][2],
+            "Discriminator should be present in nested structures by default",
+        )
+
+        # Now test with use_discriminators=False
+        json_str_no_disc = container.model_dump_json(use_discriminators=False)
+        logger.debug(f"JSON serialization with use_discriminators=False:\n{json_str_no_disc}")
+        data_no_disc = json.loads(json_str_no_disc)
+
+        # Check first level discriminators are removed
+        self.assertNotIn(
+            "animal_type",
+            data_no_disc["animals"][0],
+            "Discriminator should NOT be present in first level with use_discriminators=False",
+        )
+
+        # Check nested discriminators are removed
+        self.assertNotIn(
+            "animal_type",
+            data_no_disc["nested_dict"]["key"]["nested"][0],
+            "Discriminator should NOT be present in nested structures with use_discriminators=False",
+        )
+        self.assertNotIn(
+            "animal_type",
+            data_no_disc["nested_dict"]["key"]["nested"][2],
+            "Discriminator should NOT be present in nested structures with use_discriminators=False",
+        )
+
+    def test_json_serialization_with_options(self):
+        """Test JSON serialization with various JSON options to ensure they're handled correctly"""
+        logger.info("Running test_json_serialization_with_options")
+
+        # Create some instances
+        dog = Dog(name="Rex", breed="German Shepherd")
+        cat = Cat(name="Whiskers", lives_left=9)
+
+        class ShelterWithComplexFields(BaseModel):
+            name: str
+            animals: List[Union[Dog, Cat]]
+            metadata: Dict[str, Any]
+
+        # Create a shelter with some complex metadata
+        shelter = ShelterWithComplexFields(
+            name="Happy Pets",
+            animals=[dog, cat],
+            metadata={
+                "founded": "2020-01-01",
+                "location": {"city": "San Francisco", "state": "CA"},
+                "capacity": 100,
+            },
+        )
+
+        # Test with monkey patching enabled
+        DiscriminatedConfig.enable_monkey_patching()
+        logger.debug("With monkey patching enabled:")
+
+        # 1. Test with default options
+        json_default = shelter.model_dump_json()
+        logger.debug(f"Default JSON: {json_default}")
+
+        # Parse and verify discriminators are present
+        data_default = json.loads(json_default)
+        self.assertIn(
+            "animal_type",
+            data_default["animals"][0],
+            "Discriminator field should be present by default",
+        )
+
+        # 2. Test with indent option
+        json_indented = shelter.model_dump_json(indent=2)
+        logger.debug(f"Indented JSON: {json_indented}")
+
+        # Verify the JSON is properly indented (will have newlines)
+        self.assertIn("\n", json_indented, "JSON should be indented with newlines")
+
+        # Parse and verify discriminators are still present
+        data_indented = json.loads(json_indented)
+        self.assertIn(
+            "animal_type",
+            data_indented["animals"][0],
+            "Discriminator field should be present with indent option",
+        )
+
+        # 3. Test with both indent and sort_keys options
+        json_sorted = shelter.model_dump_json(indent=2, sort_keys=True)
+        logger.debug(f"Sorted and indented JSON: {json_sorted}")
+
+        # Parse and verify discriminators are still present
+        data_sorted = json.loads(json_sorted)
+        self.assertIn(
+            "animal_type",
+            data_sorted["animals"][0],
+            "Discriminator field should be present with indent and sort_keys options",
+        )
+
+        # 4. Test with exclude_unset and indent options (model_dump and json options)
+        json_exclude = shelter.model_dump_json(exclude_unset=True, indent=2)
+        logger.debug(f"JSON with exclude_unset and indent: {json_exclude}")
+
+        # Verify it's properly indented
+        self.assertIn("\n", json_exclude, "JSON should be indented with newlines")
+
+        # Parse and verify discriminators are still present
+        data_exclude = json.loads(json_exclude)
+        self.assertIn(
+            "animal_type",
+            data_exclude["animals"][0],
+            "Discriminator field should be present with exclude_unset option",
+        )
+
+        # 5. Test with use_discriminators=False to verify it works with JSON options
+        json_no_disc = shelter.model_dump_json(indent=2, use_discriminators=False)
+        logger.debug(f"JSON with use_discriminators=False: {json_no_disc}")
+
+        # Parse and verify discriminators are NOT present
+        data_no_disc = json.loads(json_no_disc)
+        self.assertNotIn(
+            "animal_type",
+            data_no_disc["animals"][0],
+            "Discriminator field should NOT be present with use_discriminators=False",
+        )
+        self.assertNotIn(
+            "discriminator_category",
+            data_no_disc["animals"][0],
+            "Standard discriminator field should NOT be present with use_discriminators=False",
+        )
+
+        logger.info("test_json_serialization_with_options PASSED")
+
     def test_monkey_patching_approach(self):
         """Test the monkey patching approach (BaseModel is patched)"""
         logger.info("Running test_monkey_patching_approach")

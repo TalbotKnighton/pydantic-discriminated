@@ -153,10 +153,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     git tag -a $VERSION -m "Release $VERSION"
     git push origin $VERSION
     
-    # Push documentation to GitHub Pages
-    echo "Pushing documentation to GitHub Pages..."
-    mike deploy --push --update-aliases $VERSION_NO_V latest
-    mike set-default --push latest
+    # # Push documentation to GitHub Pages
+    # echo "Pushing documentation to GitHub Pages..."
+    # mike deploy --push --update-aliases $VERSION_NO_V latest
+    # mike set-default --push latest
     
     # Switch back to dev branch
     echo "Switching back to dev branch..."

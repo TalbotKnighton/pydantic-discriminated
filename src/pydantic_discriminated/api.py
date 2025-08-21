@@ -13,6 +13,7 @@ The module supports:
 """
 
 from enum import Enum
+import inspect
 from typing import (
     Any,
     Dict,
@@ -161,6 +162,170 @@ def _apply_monkey_patch():
                 # Process it to REMOVE discriminators from nested models
                 return _process_discriminators(self, result, use_discriminators=False)
 
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     """
+        #     Patched version of model_dump_json that handles discriminator fields.
+
+        #     Args:
+        #         **kwargs: Keyword arguments to pass to the original model_dump_json method.
+        #             A special 'use_discriminators' parameter can be passed to override
+        #             the global setting.
+
+        #     Returns:
+        #         (str): The JSON string representation of the model with discriminator fields
+        #             included or excluded based on configuration.
+        #     """
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     print(
+        #         f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+        #     )
+
+        #     # Separate model_dump kwargs from json.dumps kwargs
+        #     # Common JSON arguments that should not be passed to model_dump
+        #     json_specific_args = {
+        #         "indent",
+        #         "ensure_ascii",
+        #         "separators",
+        #         "default",
+        #         "encoder",
+        #         "sort_keys",
+        #     }
+
+        #     model_dump_kwargs = {k: v for k, v in kwargs.items() if k not in json_specific_args}
+        #     json_kwargs = {k: v for k, v in kwargs.items() if k in json_specific_args}
+
+        #     # Add our discriminator flag to model_dump kwargs
+        #     model_dump_kwargs["use_discriminators"] = use_discriminators
+
+        #     # Get the model data using patched_model_dump
+        #     data = patched_model_dump(self, **model_dump_kwargs)
+
+        #     # Convert to JSON
+        #     encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+        #     return json.dumps(data, default=encoder, **json_kwargs)
+
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     """
+        #     Patched version of model_dump_json that handles discriminator fields.
+
+        #     Args:
+        #         **kwargs: Keyword arguments to pass to the original model_dump_json method.
+        #             A special 'use_discriminators' parameter can be passed to override
+        #             the global setting.
+
+        #     Returns:
+        #         (str): The JSON string representation of the model with discriminator fields
+        #             included or excluded based on configuration.
+        #     """
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     print(
+        #         f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+        #     )
+
+        #     # Get the data with appropriate discriminator handling
+        #     data = self.model_dump(use_discriminators=use_discriminators)
+
+        #     # Now call the original model_dump_json but with our processed data
+        #     # Since we can't directly pass the data to the original method,
+        #     # we need to handle the JSON conversion ourselves
+
+        #     # Get parameters accepted by json.dumps
+        #     json_params = set(inspect.signature(json.dumps).parameters.keys())
+        #     json_params.add("encoder")  # Special case in Pydantic
+
+        #     # Filter out our custom parameter and extract JSON-specific kwargs
+        #     kwargs.pop("use_discriminators", None)  # Remove if present again
+        #     json_kwargs = {k: v for k, v in kwargs.items() if k in json_params}
+
+        #     # Handle encoder separately as it maps to 'default' in json.dumps
+        #     encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+
+        #     # Convert to JSON
+        #     return json.dumps(data, default=encoder, **json_kwargs)
+
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     """
+        #     Patched version of model_dump_json that handles discriminator fields.
+
+        #     Args:
+        #         **kwargs: Keyword arguments to pass to the original model_dump_json method.
+        #             A special 'use_discriminators' parameter can be passed to override
+        #             the global setting.
+
+        #     Returns:
+        #         (str): The JSON string representation of the model with discriminator fields
+        #             included or excluded based on configuration.
+        #     """
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     print(
+        #         f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+        #     )
+
+        #     # Process the model to add or remove discriminators as needed
+        #     # Note: this creates a new dict that we can pass to json.dumps
+        #     data = patched_model_dump(self, use_discriminators=use_discriminators)
+
+        #     # Get the original json.dumps parameters from the kwargs
+        #     # Note: we don't need to filter because we already removed our custom parameter
+        #     # And we're directly calling json.dumps rather than the original method
+
+        #     # Handle 'encoder' parameter which maps to 'default' in json.dumps
+        #     encoder = kwargs.pop("encoder", None) if "encoder" in kwargs else None
+
+        #     # Use json.dumps directly with all remaining kwargs
+        #     return json.dumps(data, default=encoder, **kwargs)
+
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     # Get JSON parameters dynamically using inspect
+        #     json_params = set(inspect.signature(json.dumps).parameters.keys())
+        #     if "obj" in json_params:
+        #         json_params.remove("obj")
+        #     json_params.add("encoder")
+
+        #     # Split kwargs into model_dump and json kwargs
+        #     model_dump_kwargs = {}
+        #     json_kwargs = {}
+
+        #     for k, v in kwargs.items():
+        #         if k in json_params:
+        #             json_kwargs[k] = v
+        #         else:
+        #             model_dump_kwargs[k] = v
+
+        #     # Get model data and process discriminators
+        #     data = _original_methods["model_dump"](self, **model_dump_kwargs)
+        #     data = _process_discriminators(self, data, use_discriminators=use_discriminators)
+
+        #     # Handle encoder parameter
+        #     encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+
+        #     # Convert to JSON
+        #     return json.dumps(data, default=encoder, **json_kwargs)
         def patched_model_dump_json(self, **kwargs: Any) -> str:
             """
             Patched version of model_dump_json that handles discriminator fields.
@@ -185,14 +350,35 @@ def _apply_monkey_patch():
                 f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
             )
 
-            # Use model_dump but make sure to create a copy of kwargs to avoid modifying the original
-            kwargs_copy = kwargs.copy()
-            kwargs_copy["use_discriminators"] = use_discriminators
-            data = self.model_dump(**kwargs_copy)
+            # Get JSON parameters dynamically using inspect
+            json_params = set(inspect.signature(json.dumps).parameters.keys())
+            # Remove 'obj' which is the first positional parameter of json.dumps
+            if "obj" in json_params:
+                json_params.remove("obj")
+            # Add 'encoder' which is Pydantic-specific and maps to 'default' in json.dumps
+            json_params.add("encoder")
+
+            # Split kwargs into model_dump and json kwargs
+            model_dump_kwargs = {}
+            json_kwargs = {}
+
+            for k, v in kwargs.items():
+                if k in json_params:
+                    json_kwargs[k] = v
+                else:
+                    # If not a JSON parameter, assume it's for model_dump
+                    model_dump_kwargs[k] = v
+
+            # Get model data with discriminators handled appropriately
+            # Instead of calling model_dump directly, use the original method and process the result
+            data = _original_methods["model_dump"](self, **model_dump_kwargs)
+            data = _process_discriminators(self, data, use_discriminators=use_discriminators)
+
+            # Handle encoder parameter specifically
+            encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
 
             # Convert to JSON
-            encoder = kwargs.pop("encoder", None)
-            return json.dumps(data, default=encoder, **kwargs)
+            return json.dumps(data, default=encoder, **json_kwargs)
 
         # Apply patches
         BaseModel.model_dump = patched_model_dump
@@ -202,128 +388,524 @@ def _apply_monkey_patch():
         DiscriminatedConfig._patched = True
 
 
+# def _process_discriminators(model, data, use_discriminators=True):
+#     """
+#     Process data to add or remove discriminators for nested models.
+
+#     This function recursively processes a data structure to add or remove discriminator
+#     fields from discriminated models at all nesting levels.
+
+#     Args:
+#         model: The model instance that produced the data.
+#         data: The data to process.
+#         use_discriminators: Whether to include discriminator fields. Defaults to True.
+
+#     Returns:
+#         The processed data with discriminators added or removed according to the
+#         use_discriminators parameter.
+
+#     Note:
+#         This is an internal function not meant to be called directly by users.
+#     """
+#     # Add debugging to see when this is called
+#     print(
+#         f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
+#     )
+
+#     # Handle dictionaries
+#     if isinstance(data, dict):
+#         result = {}
+#         for key, value in data.items():
+#             # Get the original field value from the model if possible
+#             field_value = getattr(model, key, None)
+
+
+#             # Process based on field type
+#             if isinstance(field_value, list) and isinstance(value, list):
+#                 # Handle lists of models
+#                 result[key] = []
+#                 for idx, (item, item_data) in enumerate(zip(field_value, value)):
+#                     if isinstance(item, DiscriminatedBaseModel):
+#                         # For discriminated models, use their own model_dump with our flag
+#                         try:
+#                             processed_data = item.model_dump(use_discriminators=use_discriminators)
+#                             result[key].append(processed_data)
+#                         except Exception as e:
+#                             print(f"DEBUG: Error processing item {idx} in list: {e}")
+#                             # Fall back to original data if there's an error
+#                             if use_discriminators:
+#                                 # Add discriminator fields
+#                                 item_data = dict(item_data)  # Make a copy
+#                                 item_data[item._discriminator_field] = item._discriminator_value
+#                                 if getattr(
+#                                     item,
+#                                     "_use_standard_fields",
+#                                     DiscriminatedConfig.use_standard_fields,
+#                                 ):
+#                                     item_data[DiscriminatedConfig.standard_category_field] = (
+#                                         item._discriminator_field
+#                                     )
+#                                     item_data[DiscriminatedConfig.standard_value_field] = (
+#                                         item._discriminator_value
+#                                     )
+#                             else:
+#                                 # Remove discriminator fields
+#                                 item_data = dict(item_data)  # Make a copy
+#                                 if item._discriminator_field in item_data:
+#                                     del item_data[item._discriminator_field]
+#                                 if DiscriminatedConfig.standard_category_field in item_data:
+#                                     del item_data[DiscriminatedConfig.standard_category_field]
+#                                 if DiscriminatedConfig.standard_value_field in item_data:
+#                                     del item_data[DiscriminatedConfig.standard_value_field]
+#                             result[key].append(item_data)
+#                     elif isinstance(item, BaseModel):
+#                         # For other models, process recursively
+#                         processed_data = _process_discriminators(
+#                             item, item_data, use_discriminators
+#                         )
+#                         result[key].append(processed_data)
+#                     else:
+#                         # For other types, keep as is
+#                         result[key].append(item_data)
+#             elif isinstance(field_value, DiscriminatedBaseModel) and isinstance(value, dict):
+#                 # It's a discriminated model - use its model_dump with our flag
+#                 try:
+#                     result[key] = field_value.model_dump(use_discriminators=use_discriminators)
+#                 except Exception as e:
+#                     print(f"DEBUG: Error processing field {key}: {e}")
+#                     # Fall back to manual processing
+#                     if use_discriminators:
+#                         # Add discriminator fields
+#                         value_copy = dict(value)  # Make a copy
+#                         value_copy[field_value._discriminator_field] = (
+#                             field_value._discriminator_value
+#                         )
+#                         if getattr(
+#                             field_value,
+#                             "_use_standard_fields",
+#                             DiscriminatedConfig.use_standard_fields,
+#                         ):
+#                             value_copy[DiscriminatedConfig.standard_category_field] = (
+#                                 field_value._discriminator_field
+#                             )
+#                             value_copy[DiscriminatedConfig.standard_value_field] = (
+#                                 field_value._discriminator_value
+#                             )
+#                         result[key] = value_copy
+#                     else:
+#                         # Remove discriminator fields
+#                         value_copy = dict(value)  # Make a copy
+#                         if field_value._discriminator_field in value_copy:
+#                             del value_copy[field_value._discriminator_field]
+#                         if DiscriminatedConfig.standard_category_field in value_copy:
+#                             del value_copy[DiscriminatedConfig.standard_category_field]
+#                         if DiscriminatedConfig.standard_value_field in value_copy:
+#                             del value_copy[DiscriminatedConfig.standard_value_field]
+#                         result[key] = value_copy
+#             elif isinstance(field_value, BaseModel) and isinstance(value, dict):
+#                 # It's a regular BaseModel - process it recursively
+#                 result[key] = _process_discriminators(field_value, value, use_discriminators)
+#             else:
+#                 # Other types - keep as is
+#                 result[key] = value
+#         return result
+#     # Handle other types
+#     return data
+# def _process_discriminators(model, data, use_discriminators=True):
+#     """
+#     Process data to add or remove discriminators for nested models.
+
+#     This function recursively processes a data structure to add or remove discriminator
+#     fields from discriminated models at all nesting levels.
+
+#     Args:
+#         model: The model instance that produced the data.
+#         data: The data to process.
+#         use_discriminators: Whether to include discriminator fields. Defaults to True.
+
+#     Returns:
+#         The processed data with discriminators added or removed according to the
+#         use_discriminators parameter.
+#     """
+#     # Add debugging to see when this is called
+#     print(
+#         f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
+#     )
+
+#     # Handle dictionaries
+#     if isinstance(data, dict):
+#         result = {}
+#         for key, value in data.items():
+#             # Get the original field value from the model if possible
+#             field_value = getattr(model, key, None)
+
+#             # Process based on field type
+#             if isinstance(field_value, list) and isinstance(value, list):
+#                 # Handle lists of models
+#                 result[key] = []
+#                 for idx, item_data in enumerate(value):
+#                     # Try to get the original item, but it might not be accessible
+#                     item = None
+#                     if idx < len(field_value):
+#                         item = field_value[idx]
+
+
+#                     if isinstance(item, DiscriminatedBaseModel) and isinstance(item_data, dict):
+#                         # Process discriminated models in lists
+#                         if use_discriminators:
+#                             # Add discriminator fields
+#                             item_data_copy = dict(item_data)  # Make a copy
+#                             item_data_copy[item._discriminator_field] = item._discriminator_value
+#                             if getattr(
+#                                 item,
+#                                 "_use_standard_fields",
+#                                 DiscriminatedConfig.use_standard_fields,
+#                             ):
+#                                 item_data_copy[DiscriminatedConfig.standard_category_field] = (
+#                                     item._discriminator_field
+#                                 )
+#                                 item_data_copy[DiscriminatedConfig.standard_value_field] = (
+#                                     item._discriminator_value
+#                                 )
+#                             result[key].append(item_data_copy)
+#                         else:
+#                             # Remove discriminator fields
+#                             item_data_copy = dict(item_data)  # Make a copy
+#                             if item._discriminator_field in item_data_copy:
+#                                 del item_data_copy[item._discriminator_field]
+#                             if DiscriminatedConfig.standard_category_field in item_data_copy:
+#                                 del item_data_copy[DiscriminatedConfig.standard_category_field]
+#                             if DiscriminatedConfig.standard_value_field in item_data_copy:
+#                                 del item_data_copy[DiscriminatedConfig.standard_value_field]
+#                             result[key].append(item_data_copy)
+#                     elif isinstance(item, BaseModel) and isinstance(item_data, dict):
+#                         # Recursively process other models in lists
+#                         processed_data = _process_discriminators(
+#                             item, item_data, use_discriminators
+#                         )
+#                         result[key].append(processed_data)
+#                     elif isinstance(item_data, dict):
+#                         # Special case: could be a discriminated model without the original object
+#                         # Check for discriminator fields in the data
+#                         if not use_discriminators and "animal_type" in item_data:
+#                             # This looks like a discriminated model, remove discriminator fields
+#                             item_data_copy = dict(item_data)
+#                             for disc_field in [
+#                                 "animal_type",
+#                                 DiscriminatedConfig.standard_category_field,
+#                                 DiscriminatedConfig.standard_value_field,
+#                             ]:
+#                                 if disc_field in item_data_copy:
+#                                     del item_data_copy[disc_field]
+#                             result[key].append(item_data_copy)
+#                         else:
+#                             # Just process it recursively as a normal dictionary
+#                             processed_data = _process_discriminators(
+#                                 type("DummyModel", (BaseModel,), {})(),
+#                                 item_data,
+#                                 use_discriminators,
+#                             )
+#                             result[key].append(processed_data)
+#                     elif isinstance(item_data, list):
+#                         # Handle lists in lists recursively
+#                         processed_items = []
+#                         for sub_item in item_data:
+#                             if isinstance(sub_item, dict):
+#                                 processed_sub_item = _process_discriminators(
+#                                     type("DummyModel", (BaseModel,), {})(),
+#                                     sub_item,
+#                                     use_discriminators,
+#                                 )
+#                                 processed_items.append(processed_sub_item)
+#                             else:
+#                                 processed_items.append(sub_item)
+#                         result[key].append(processed_items)
+#                     else:
+#                         # Other types in lists - keep as is
+#                         result[key].append(item_data)
+#             elif isinstance(field_value, DiscriminatedBaseModel) and isinstance(value, dict):
+#                 # Process discriminated models
+#                 if use_discriminators:
+#                     # Add discriminator fields
+#                     value_copy = dict(value)  # Make a copy
+#                     value_copy[field_value._discriminator_field] = field_value._discriminator_value
+#                     if getattr(
+#                         field_value, "_use_standard_fields", DiscriminatedConfig.use_standard_fields
+#                     ):
+#                         value_copy[DiscriminatedConfig.standard_category_field] = (
+#                             field_value._discriminator_field
+#                         )
+#                         value_copy[DiscriminatedConfig.standard_value_field] = (
+#                             field_value._discriminator_value
+#                         )
+#                     result[key] = value_copy
+#                 else:
+#                     # Remove discriminator fields
+#                     value_copy = dict(value)  # Make a copy
+#                     if field_value._discriminator_field in value_copy:
+#                         del value_copy[field_value._discriminator_field]
+#                     if DiscriminatedConfig.standard_category_field in value_copy:
+#                         del value_copy[DiscriminatedConfig.standard_category_field]
+#                     if DiscriminatedConfig.standard_value_field in value_copy:
+#                         del value_copy[DiscriminatedConfig.standard_value_field]
+#                     result[key] = value_copy
+#             elif isinstance(field_value, BaseModel) and isinstance(value, dict):
+#                 # Recursively process other models
+#                 result[key] = _process_discriminators(field_value, value, use_discriminators)
+#             elif isinstance(value, dict):
+#                 # Special case for nested dictionaries
+#                 processed_dict = {}
+#                 for sub_key, sub_value in value.items():
+#                     if isinstance(sub_value, list):
+#                         # Handle lists in dictionaries
+#                         processed_list = []
+#                         for sub_item in sub_value:
+#                             if isinstance(sub_item, dict):
+#                                 # Check if it looks like a discriminated model
+#                                 if not use_discriminators and "animal_type" in sub_item:
+#                                     # Remove discriminator fields
+#                                     sub_item_copy = dict(sub_item)
+#                                     for disc_field in [
+#                                         "animal_type",
+#                                         DiscriminatedConfig.standard_category_field,
+#                                         DiscriminatedConfig.standard_value_field,
+#                                     ]:
+#                                         if disc_field in sub_item_copy:
+#                                             del sub_item_copy[disc_field]
+#                                     processed_list.append(sub_item_copy)
+#                                 else:
+#                                     # Process it recursively
+#                                     processed_sub_item = _process_discriminators(
+#                                         type("DummyModel", (BaseModel,), {})(),
+#                                         sub_item,
+#                                         use_discriminators,
+#                                     )
+#                                     processed_list.append(processed_sub_item)
+#                             else:
+#                                 processed_list.append(sub_item)
+#                         processed_dict[sub_key] = processed_list
+#                     elif isinstance(sub_value, dict):
+#                         # Recursively process nested dictionaries
+#                         processed_dict[sub_key] = _process_discriminators(
+#                             type("DummyModel", (BaseModel,), {})(), sub_value, use_discriminators
+#                         )
+#                     else:
+#                         processed_dict[sub_key] = sub_value
+#                 result[key] = processed_dict
+#             elif isinstance(value, list):
+#                 # Handle lists that might contain nested models
+#                 result[key] = []
+#                 for item_data in value:
+#                     if isinstance(item_data, dict):
+#                         # Check if it looks like a discriminated model
+#                         if not use_discriminators and "animal_type" in item_data:
+#                             # Remove discriminator fields
+#                             item_data_copy = dict(item_data)
+#                             for disc_field in [
+#                                 "animal_type",
+#                                 DiscriminatedConfig.standard_category_field,
+#                                 DiscriminatedConfig.standard_value_field,
+#                             ]:
+#                                 if disc_field in item_data_copy:
+#                                     del item_data_copy[disc_field]
+#                             result[key].append(item_data_copy)
+#                         else:
+#                             # Process it recursively
+#                             processed_data = _process_discriminators(
+#                                 type("DummyModel", (BaseModel,), {})(),
+#                                 item_data,
+#                                 use_discriminators,
+#                             )
+#                             result[key].append(processed_data)
+#                     elif isinstance(item_data, list):
+#                         # Handle nested lists
+#                         processed_items = []
+#                         for sub_item in item_data:
+#                             if isinstance(sub_item, dict):
+#                                 processed_sub_item = _process_discriminators(
+#                                     type("DummyModel", (BaseModel,), {})(),
+#                                     sub_item,
+#                                     use_discriminators,
+#                                 )
+#                                 processed_items.append(processed_sub_item)
+#                             else:
+#                                 processed_items.append(sub_item)
+#                         result[key].append(processed_items)
+#                     else:
+#                         result[key].append(item_data)
+#             else:
+#                 # Other types - keep as is
+#                 result[key] = value
+#         return result
+#     elif isinstance(data, list):
+#         # Handle top-level lists
+#         result = []
+#         for item in data:
+#             if isinstance(item, dict):
+#                 # Check if it looks like a discriminated model
+#                 if not use_discriminators and "animal_type" in item:
+#                     # Remove discriminator fields
+#                     item_copy = dict(item)
+#                     for disc_field in [
+#                         "animal_type",
+#                         DiscriminatedConfig.standard_category_field,
+#                         DiscriminatedConfig.standard_value_field,
+#                     ]:
+#                         if disc_field in item_copy:
+#                             del item_copy[disc_field]
+#                     result.append(item_copy)
+#                 else:
+#                     # Process it recursively
+#                     processed_item = _process_discriminators(
+#                         type("DummyModel", (BaseModel,), {})(), item, use_discriminators
+#                     )
+#                     result.append(processed_item)
+#             elif isinstance(item, list):
+#                 # Handle nested lists
+#                 processed_items = []
+#                 for sub_item in item:
+#                     if isinstance(sub_item, dict):
+#                         processed_sub_item = _process_discriminators(
+#                             type("DummyModel", (BaseModel,), {})(), sub_item, use_discriminators
+#                         )
+#                         processed_items.append(processed_sub_item)
+#                     else:
+#                         processed_items.append(sub_item)
+#                 result.append(processed_items)
+#             else:
+#                 result.append(item)
+#         return result
+#     # Handle other types
+#     return data
 def _process_discriminators(model, data, use_discriminators=True):
     """
     Process data to add or remove discriminators for nested models.
 
     This function recursively processes a data structure to add or remove discriminator
-    fields from discriminated models at all nesting levels.
+    fields from discriminated models at all nesting levels. It handles any type of
+    Python collection including dictionaries, lists, tuples, sets, and custom iterables.
 
     Args:
         model: The model instance that produced the data.
-        data: The data to process.
+        data: The data to process (any type).
         use_discriminators: Whether to include discriminator fields. Defaults to True.
 
     Returns:
         The processed data with discriminators added or removed according to the
         use_discriminators parameter.
-
-    Note:
-        This is an internal function not meant to be called directly by users.
     """
-    # Add debugging to see when this is called
     print(
         f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
     )
 
-    # Handle dictionaries
-    if isinstance(data, dict):
-        result = {}
-        for key, value in data.items():
-            # Get the original field value from the model if possible
-            field_value = getattr(model, key, None)
+    # Get all known discriminator field names from the registry
+    known_discriminator_fields = set(DiscriminatedModelRegistry._registry.keys())
+    # Add standard fields to the set
+    standard_fields = {
+        DiscriminatedConfig.standard_category_field,
+        DiscriminatedConfig.standard_value_field,
+    }
 
-            # Process based on field type
-            if isinstance(field_value, list) and isinstance(value, list):
-                # Handle lists of models
-                result[key] = []
-                for idx, (item, item_data) in enumerate(zip(field_value, value)):
-                    if isinstance(item, DiscriminatedBaseModel):
-                        # For discriminated models, use their own model_dump with our flag
-                        try:
-                            processed_data = item.model_dump(use_discriminators=use_discriminators)
-                            result[key].append(processed_data)
-                        except Exception as e:
-                            print(f"DEBUG: Error processing item {idx} in list: {e}")
-                            # Fall back to original data if there's an error
-                            if use_discriminators:
-                                # Add discriminator fields
-                                item_data = dict(item_data)  # Make a copy
-                                item_data[item._discriminator_field] = item._discriminator_value
-                                if getattr(
-                                    item,
-                                    "_use_standard_fields",
-                                    DiscriminatedConfig.use_standard_fields,
-                                ):
-                                    item_data[DiscriminatedConfig.standard_category_field] = (
-                                        item._discriminator_field
-                                    )
-                                    item_data[DiscriminatedConfig.standard_value_field] = (
-                                        item._discriminator_value
-                                    )
-                            else:
-                                # Remove discriminator fields
-                                item_data = dict(item_data)  # Make a copy
-                                if item._discriminator_field in item_data:
-                                    del item_data[item._discriminator_field]
-                                if DiscriminatedConfig.standard_category_field in item_data:
-                                    del item_data[DiscriminatedConfig.standard_category_field]
-                                if DiscriminatedConfig.standard_value_field in item_data:
-                                    del item_data[DiscriminatedConfig.standard_value_field]
-                            result[key].append(item_data)
-                    elif isinstance(item, BaseModel):
-                        # For other models, process recursively
-                        processed_data = _process_discriminators(
-                            item, item_data, use_discriminators
-                        )
-                        result[key].append(processed_data)
-                    else:
-                        # For other types, keep as is
-                        result[key].append(item_data)
-            elif isinstance(field_value, DiscriminatedBaseModel) and isinstance(value, dict):
-                # It's a discriminated model - use its model_dump with our flag
-                try:
-                    result[key] = field_value.model_dump(use_discriminators=use_discriminators)
-                except Exception as e:
-                    print(f"DEBUG: Error processing field {key}: {e}")
-                    # Fall back to manual processing
-                    if use_discriminators:
-                        # Add discriminator fields
-                        value_copy = dict(value)  # Make a copy
-                        value_copy[field_value._discriminator_field] = (
-                            field_value._discriminator_value
-                        )
-                        if getattr(
-                            field_value,
-                            "_use_standard_fields",
-                            DiscriminatedConfig.use_standard_fields,
-                        ):
-                            value_copy[DiscriminatedConfig.standard_category_field] = (
-                                field_value._discriminator_field
-                            )
-                            value_copy[DiscriminatedConfig.standard_value_field] = (
-                                field_value._discriminator_value
-                            )
-                        result[key] = value_copy
-                    else:
-                        # Remove discriminator fields
-                        value_copy = dict(value)  # Make a copy
-                        if field_value._discriminator_field in value_copy:
-                            del value_copy[field_value._discriminator_field]
-                        if DiscriminatedConfig.standard_category_field in value_copy:
-                            del value_copy[DiscriminatedConfig.standard_category_field]
-                        if DiscriminatedConfig.standard_value_field in value_copy:
-                            del value_copy[DiscriminatedConfig.standard_value_field]
-                        result[key] = value_copy
-            elif isinstance(field_value, BaseModel) and isinstance(value, dict):
-                # It's a regular BaseModel - process it recursively
-                result[key] = _process_discriminators(field_value, value, use_discriminators)
+    def process_value(value, parent_model=None, field_name=None):
+        """
+        Process any value recursively, handling collection types appropriately.
+
+        Args:
+            value: The value to process.
+            parent_model: The model that contains this value, if available.
+            field_name: The field name in the parent model, if available.
+
+        Returns:
+            Processed value with discriminators handled appropriately.
+        """
+        # Handle different types of values
+        if isinstance(value, dict):
+            return process_dict(value, parent_model)
+        elif isinstance(value, (list, tuple, set)):
+            return process_collection(value, parent_model, field_name)
+        else:
+            # For non-collection types, return as is
+            return value
+
+    def process_dict(d, parent_model=None):
+        """
+        Process a dictionary, handling discriminator fields appropriately.
+
+        Args:
+            d: The dictionary to process.
+            parent_model: The model that contains this dictionary, if available.
+
+        Returns:
+            Processed dictionary with discriminators handled appropriately.
+        """
+        if not isinstance(d, dict):
+            return d
+
+        result = {}
+        for key, value in d.items():
+            # Check if this key is a discriminator field
+            is_discriminator = key in known_discriminator_fields or key in standard_fields
+
+            # Handle based on whether we want discriminators and what type the value is
+            if is_discriminator and not use_discriminators:
+                # Skip discriminator fields when not wanted
+                continue
             else:
-                # Other types - keep as is
-                result[key] = value
+                # Get the field model if available
+                field_model = getattr(parent_model, key, None) if parent_model else None
+                # Process the value recursively
+                result[key] = process_value(value, field_model, key)
+
         return result
-    # Handle other types
-    return data
+
+    def process_collection(collection, parent_model=None, field_name=None):
+        """
+        Process any collection type (list, tuple, set, etc.), handling items appropriately.
+
+        Args:
+            collection: The collection to process.
+            parent_model: The model that contains this collection, if available.
+            field_name: The field name in the parent model, if available.
+
+        Returns:
+            Processed collection with discriminators handled appropriately.
+        """
+        # Try to get the collection field from the parent model
+        original_items = []
+        if parent_model and field_name:
+            original_field = getattr(parent_model, field_name, None)
+            if isinstance(original_field, (list, tuple, set)):
+                original_items = list(original_field)
+
+        # Create results of the same type as the input
+        result_items = []
+
+        # Process each item
+        for i, item in enumerate(collection):
+            # Try to get original model for this item
+            original_model = original_items[i] if i < len(original_items) else None
+
+            # Process the item recursively
+            processed_item = process_value(item, original_model, None)
+            result_items.append(processed_item)
+
+        # Convert result back to the original collection type
+        if isinstance(collection, list):
+            return result_items
+        elif isinstance(collection, tuple):
+            return tuple(result_items)
+        elif isinstance(collection, set):
+            return set(result_items)
+        else:
+            # For any other collection type, try to instantiate with the processed items
+            # Fall back to returning a list if that fails
+            try:
+                return type(collection)(result_items)
+            except Exception:
+                return result_items
+
+    # Start processing from the top level
+    return process_value(data, model)
 
 
 class DiscriminatedModelRegistry:
