@@ -97,9 +97,9 @@ class DiscriminatedConfig:
             >>> from pydantic_discriminated import DiscriminatedConfig
             >>> DiscriminatedConfig.disable_monkey_patching()
         """
-        print("DEBUG: Disabling monkey patching, previous value:", cls.patch_base_model)
+        # print("DEBUG: Disabling monkey patching, previous value:", cls.patch_base_model)
         cls.patch_base_model = False
-        print("DEBUG: After disabling, new value:", cls.patch_base_model)
+        # print("DEBUG: After disabling, new value:", cls.patch_base_model)
 
 
 def _apply_monkey_patch():
@@ -143,9 +143,9 @@ def _apply_monkey_patch():
             else:
                 use_discriminators = DiscriminatedConfig.patch_base_model
 
-            print(
-                f"DEBUG patched_model_dump: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
-            )
+            # print(
+            #     f"DEBUG patched_model_dump: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+            # )
 
             # Get the result from the original method (without our custom parameter)
             result = _original_methods["model_dump"](self, **kwargs)
@@ -154,11 +154,11 @@ def _apply_monkey_patch():
             # This is the key change - we need to process the result differently
             # based on whether we want discriminator fields or not
             if use_discriminators:
-                print("DEBUG: Adding discriminators to serialized data")
+                # print("DEBUG: Adding discriminators to serialized data")
                 # Process it to add discriminators
                 return _process_discriminators(self, result, use_discriminators=True)
             else:
-                print("DEBUG: Removing discriminators from serialized data")
+                # print("DEBUG: Removing discriminators from serialized data")
                 # Process it to REMOVE discriminators from nested models
                 return _process_discriminators(self, result, use_discriminators=False)
 
@@ -379,6 +379,154 @@ def _apply_monkey_patch():
 
         #     # Convert to JSON
         #     return json.dumps(data, default=encoder, **json_kwargs)
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     """
+        #     Patched version of model_dump_json that handles discriminator fields.
+
+        #     Args:
+        #         **kwargs: Keyword arguments to pass to the original model_dump_json method.
+        #             A special 'use_discriminators' parameter can be passed to override
+        #             the global setting.
+
+        #     Returns:
+        #         (str): The JSON string representation of the model with discriminator fields
+        #             included or excluded based on configuration.
+        #     """
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     print(
+        #         f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+        #     )
+
+        #     # Get JSON parameters dynamically using inspect
+        #     json_params = set(inspect.signature(json.dumps).parameters.keys())
+        #     # Remove 'obj' which is the first positional parameter of json.dumps
+        #     if "obj" in json_params:
+        #         json_params.remove("obj")
+        #     # Add 'encoder' which is Pydantic-specific and maps to 'default' in json.dumps
+        #     json_params.add("encoder")
+
+        #     # Split kwargs into model_dump and json kwargs
+        #     model_dump_kwargs = {}
+        #     json_kwargs = {}
+
+        #     for k, v in kwargs.items():
+        #         if k in json_params:
+        #             json_kwargs[k] = v
+        #         else:
+        #             # If not a JSON parameter, assume it's for model_dump
+        #             model_dump_kwargs[k] = v
+
+        #     # Get model data with discriminators handled appropriately
+        #     # Instead of calling model_dump directly, use the original method and process the result
+        #     data = _original_methods["model_dump"](self, **model_dump_kwargs)
+        #     data = _process_discriminators(self, data, use_discriminators=use_discriminators)
+
+        #     # Handle encoder parameter specifically
+        #     encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+
+        #     # If no encoder is provided, create one that can handle numpy arrays
+        #     if encoder is None:
+
+        #         def default_encoder(obj):
+        #             import numpy as np
+
+        #             if isinstance(obj, np.ndarray):
+        #                 return obj.tolist()
+        #             elif isinstance(obj, np.integer):
+        #                 return int(obj)
+        #             elif isinstance(obj, np.floating):
+        #                 return float(obj)
+        #             elif isinstance(obj, np.bool_):
+        #                 return bool(obj)
+        #             raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+        #         encoder = default_encoder
+
+        #     # Convert to JSON
+        #     return json.dumps(data, default=encoder, **json_kwargs)
+        # def patched_model_dump_json(self, **kwargs: Any) -> str:
+        #     """
+        #     Patched version of model_dump_json that handles discriminator fields.
+
+        #     Args:
+        #         **kwargs: Keyword arguments to pass to the original model_dump_json method.
+        #             A special 'use_discriminators' parameter can be passed to override
+        #             the global setting.
+
+        #     Returns:
+        #         (str): The JSON string representation of the model with discriminator fields
+        #             included or excluded based on configuration.
+        #     """
+        #     # Extract our custom parameter
+        #     use_discriminators = None
+        #     if "use_discriminators" in kwargs:
+        #         use_discriminators = kwargs.pop("use_discriminators")
+        #     else:
+        #         use_discriminators = DiscriminatedConfig.patch_base_model
+
+        #     # print(
+        #     #     f"DEBUG patched_model_dump_json: use_discriminators={use_discriminators}, global setting={DiscriminatedConfig.patch_base_model}"
+        #     # )
+
+        #     # Get JSON parameters dynamically using inspect
+        #     json_params = set(inspect.signature(json.dumps).parameters.keys())
+        #     # Remove 'obj' which is the first positional parameter of json.dumps
+        #     if "obj" in json_params:
+        #         json_params.remove("obj")
+        #     # Add 'encoder' which is Pydantic-specific and maps to 'default' in json.dumps
+        #     json_params.add("encoder")
+
+        #     # Split kwargs into model_dump and json kwargs
+        #     model_dump_kwargs = {}
+        #     json_kwargs = {}
+
+        #     for k, v in kwargs.items():
+        #         if k in json_params:
+        #             json_kwargs[k] = v
+        #         else:
+        #             # If not a JSON parameter, assume it's for model_dump
+        #             model_dump_kwargs[k] = v
+
+        #     # Get model data with discriminators handled appropriately
+        #     # Instead of calling model_dump directly, use the original method and process the result
+        #     data = _original_methods["model_dump"](self, **model_dump_kwargs)
+        #     data = _process_discriminators(self, data, use_discriminators=use_discriminators)
+
+        #     # Handle encoder parameter specifically
+        #     encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
+
+        #     # Create a custom default encoder that handles numpy arrays
+        #     def numpy_encoder(obj):
+        #         # Try to import numpy without requiring it as a dependency
+        #         try:
+        #             import numpy as np
+
+        #             if isinstance(obj, np.ndarray):
+        #                 return obj.tolist()
+        #             elif isinstance(obj, (np.integer, np.int_)):
+        #                 return int(obj)
+        #             elif isinstance(obj, (np.floating, np.float64)):
+        #                 return float(obj)
+        #             elif isinstance(obj, (np.bool_, np.bool)):
+        #                 return bool(obj)
+        #             elif isinstance(obj, (np.complexfloating, np.complex)):
+        #                 return {"real": float(obj.real), "imag": float(obj.imag)}
+        #         except ImportError:
+        #             pass
+
+        #         # Use the provided encoder or raise TypeError
+        #         if encoder is not None:
+        #             return encoder(obj)
+        #         raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+        #     # Convert to JSON using our enhanced encoder
+        #     return json.dumps(data, default=numpy_encoder, **json_kwargs)
         def patched_model_dump_json(self, **kwargs: Any) -> str:
             """
             Patched version of model_dump_json that handles discriminator fields.
@@ -391,6 +539,21 @@ def _apply_monkey_patch():
             Returns:
                 (str): The JSON string representation of the model with discriminator fields
                     included or excluded based on configuration.
+
+            Note:
+                When working with numpy arrays or types from libraries like numpydantic,
+                you must provide a custom encoder via the 'encoder' parameter to handle
+                these types properly. For example:
+
+                ```python
+                def numpy_encoder(obj):
+                    import numpy as np
+                    if isinstance(obj, np.ndarray):
+                        return obj.tolist()
+                    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
+                model.model_dump_json(encoder=numpy_encoder)
+                ```
             """
             # Extract our custom parameter
             use_discriminators = None
@@ -427,29 +590,20 @@ def _apply_monkey_patch():
             data = _original_methods["model_dump"](self, **model_dump_kwargs)
             data = _process_discriminators(self, data, use_discriminators=use_discriminators)
 
-            # Handle encoder parameter specifically
+            # Handle encoder parameter
             encoder = json_kwargs.pop("encoder", None) if "encoder" in json_kwargs else None
 
-            # If no encoder is provided, create one that can handle numpy arrays
-            if encoder is None:
-
-                def default_encoder(obj):
-                    import numpy as np
-
-                    if isinstance(obj, np.ndarray):
-                        return obj.tolist()
-                    elif isinstance(obj, np.integer):
-                        return int(obj)
-                    elif isinstance(obj, np.floating):
-                        return float(obj)
-                    elif isinstance(obj, np.bool_):
-                        return bool(obj)
-                    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
-
-                encoder = default_encoder
-
-            # Convert to JSON
-            return json.dumps(data, default=encoder, **json_kwargs)
+            # Check if encoder is a class (JSONEncoder subclass) or a function
+            if (
+                encoder is not None
+                and isinstance(encoder, type)
+                and issubclass(encoder, json.JSONEncoder)
+            ):
+                # If it's a JSONEncoder class, use it as cls parameter
+                return json.dumps(data, cls=encoder, **json_kwargs)
+            else:
+                # If it's a function or None, use it as default parameter
+                return json.dumps(data, default=encoder, **json_kwargs)
 
         # Apply patches
         BaseModel.model_dump = patched_model_dump
@@ -1179,9 +1333,9 @@ def _process_discriminators(model, data, use_discriminators=True):
         The processed data with discriminators added or removed according to the
         use_discriminators parameter.
     """
-    print(
-        f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
-    )
+    # print(
+    #     f"DEBUG _process_discriminators: processing model type {type(model).__name__}, use_discriminators={use_discriminators}"
+    # )
 
     # Get all known discriminator field names from the registry
     known_discriminator_fields = set(DiscriminatedModelRegistry._registry.keys())
@@ -1600,7 +1754,7 @@ class DiscriminatedBaseModel(BaseModel):
         """
         # Extract our custom parameter or use the global setting
         use_discriminators = kwargs.pop("use_discriminators", DiscriminatedConfig.patch_base_model)
-        print(f"DEBUG DiscriminatedBaseModel.model_dump: use_discriminators={use_discriminators}")
+        # print(f"DEBUG DiscriminatedBaseModel.model_dump: use_discriminators={use_discriminators}")
 
         # Get the result from the original method (without our custom parameter)
         if DiscriminatedConfig._patched:
